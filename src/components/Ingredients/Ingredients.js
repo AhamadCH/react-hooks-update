@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, {useState, useEffect, useCallback} from "react";
 
 import IngredientForm from "./IngredientForm";
 import IngredientList from "./IngredientList";
@@ -52,9 +52,14 @@ const Ingredients = () => {
   };
 
   const removeIngredientHandler = ingredientId => {
-    setIngredients(prevIngredients =>
-      prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
-    );
+    fetch(`https://udemyreact-hooks.firebaseio.com/ingredients/${ingredientId}.json`, {
+      method: "DELETE"
+    }
+    ).then(response => {
+      setIngredients(prevIngredients =>
+        prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
+      );
+    });
   };
 
   return (
