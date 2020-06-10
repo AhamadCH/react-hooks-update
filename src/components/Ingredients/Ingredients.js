@@ -1,61 +1,75 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from "react";
 
-import IngredientForm from './IngredientForm';
-import IngredientList from './IngredientList';
-import Search from './Search';
+import IngredientForm from "./IngredientForm";
+import IngredientList from "./IngredientList";
+import Search from "./Search";
 
 const Ingredients = () => {
-  const [ ingredients, setIngredients ] = useState([]);
+  const [ingredients, setIngredients] = useState([]);
 
   useEffect(() => {
-    fetch('https://udemyreact-hooks.firebaseio.com/ingredients.json').then(response => {
-      return response.json();
-    }).then(responseData => {
-      const loadedIngredients = [];
-      for(const key in responseData) {
-        loadedIngredients.push({
-          id: key,
-          title: responseData[key].title,
-          amount: responseData[key].amount
-        });
-      }
-      setIngredients(loadedIngredients);
-    });
+    fetch("https://udemyreact-hooks.firebaseio.com/ingredients.json")
+      .then(response => {
+        return response.json();
+      })
+      .then(responseData => {
+        const loadedIngredients = [];
+        for (const key in responseData) {
+          loadedIngredients.push({
+            id: key,
+            title: responseData[key].title,
+            amount: responseData[key].amount
+          });
+        }
+        setIngredients(loadedIngredients);
+      });
+  }, []);
+
+  const filteredIngredientsHandler = useCallback(filteredIngredients => {
+    setIngredients(filteredIngredients);
   }, []);
 
   const addIngredientHandler = ingredient => {
-    fetch('https://udemyreact-hooks.firebaseio.com/ingredients.json', {
-      method: 'POST',
+    fetch("https://udemyreact-hooks.firebaseio.com/ingredients.json", {
+      method: "POST",
       body: JSON.stringify(ingredient),
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       }
-    }).then(response => {
-      return response.json();
-    }).then(responseData => {
-      setIngredients(prevIngredients => [
-        ...prevIngredients, {
-          id: responseData.name,
-          ...ingredient
-        }
-      ]);
-    });
-  }
+    })
+      .then(response => {
+        return response.json();
+      })
+      .then(responseData => {
+        setIngredients(prevIngredients => [
+          ...prevIngredients,
+          {
+            id: responseData.name,
+            ...ingredient
+          }
+        ]);
+      });
+  };
 
   const removeIngredientHandler = ingredientId => {
-    setIngredients(prevIngredients => prevIngredients.filter(ingredient => ingredient.id !== ingredientId));
-  }
+    setIngredients(prevIngredients =>
+      prevIngredients.filter(ingredient => ingredient.id !== ingredientId)
+    );
+  };
 
   return (
     <div className="App">
-      <IngredientForm onAddIngredient={addIngredientHandler}/>
+      <IngredientForm onAddIngredient={addIngredientHandler} />
 
       <section>
-        <Search />
-        <IngredientList ingredients={ingredients} onRemoveItem={removeIngredientHandler}/>
+        <Search onLoadIngredients={filteredIngredientsHandler} />
+        <IngredientList
+          ingredients={ingredients}
+          onRemoveItem={removeIngredientHandler}
+        />
       </section>
     </div>
   );
-}
+};
 
 export default Ingredients;
